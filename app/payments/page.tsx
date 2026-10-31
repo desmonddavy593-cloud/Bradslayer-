@@ -1,0 +1,1 @@
+import {Soon} from '../service-pages';export default function Payments(){return <Soon title="Paiements et abonnements">Toutes les applications sont gratuites pour l’instant. Aucun abonnement ni paiement n’est nécessaire.</Soon>}

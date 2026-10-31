@@ -50,3 +50,13 @@ Le dépôt GitHub `desmonddavy593-cloud/Bradslayer-` est relié à Vercel : chaq
 ## Interface mobile V4 inspirée du tutoriel
 
 L’accueil mobile reprend la structure observée dans la vidéo fournie : barre de recherche arrondie, puces horizontales, grands panneaux promotionnels, rayons horizontaux, cinq onglets (`Jeux`, `Applis`, `Recherche`, `Livres`, `Vous`), panneau de profil en bas, notifications, suggestions de recherche et filtres. Les codes de Google Play sont adaptés à BradSlayer : contenu DevSlayer × Brad Society, couleurs de marque et liens vers les apps web. La barre système du téléphone et le chrome natif du navigateur restent contrôlés par Android/iOS et ne peuvent pas être remplacés par le site.
+
+## V4 : navigation et comptes développeurs
+
+La navigation mobile ne contient plus de menu mort : l’en-tête, la cloche, l’avatar, les entrées du menu profil, les cartes et les contrôles des rayons ouvrent des vues ou des pages dédiées. Les pages `/notifications`, `/manage-apps`, `/payments`, `/protection`, `/pass`, `/points`, `/settings`, `/help` et `/developers` sont disponibles.
+
+Les développeurs s’inscrivent désormais avec un pseudo unique et un mot de passe, sans adresse e-mail obligatoire. La colonne `User.username` est ajoutée sans supprimer `User.email`. Les anciens comptes sont complétés progressivement à partir de la partie locale de leur adresse e-mail lors de leur prochaine requête, sans seed de build.
+
+Nouvelles tables V4 : `Announcement`, `AnnouncementRead` et `HelpComment`. Elles devront recevoir leurs politiques RLS Supabase après déploiement.
+
+Les seuls textes de marque visibles dans l’application sont désormais ceux de BradSlayer, DevSlayer et Brad Society ; les libellés hérités de la référence ont été adaptés.

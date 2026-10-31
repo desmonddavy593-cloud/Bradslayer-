@@ -1,0 +1,1 @@
+import {Soon} from '../service-pages';export default function Protection(){return <Soon title="Protection BradSlayer">Nous validons les applications, affichons le badge Vérifié lorsqu’il est attribué par l’admin et permettons de signaler une app qui semble cassée ou dangereuse.</Soon>}

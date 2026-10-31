@@ -1,0 +1,1 @@
+import {Soon} from '../service-pages';export default function Points(){return <Soon title="Points BradSlayer">Les Points BradSlayer permettront plus tard de valoriser la participation à la communauté.</Soon>}
