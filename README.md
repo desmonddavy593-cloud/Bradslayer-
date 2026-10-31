@@ -1,48 +1,39 @@
 # BradSlayer Store
 
-BradSlayer Store est le catalogue d’applications web de **DevSlayer × Brad Society**. La V1 référence des PWA hébergées ailleurs : le store présente chaque fiche et le bouton **Ouvrir** redirige vers l’application. Aucun APK n’est stocké.
+BradSlayer Store est le store PWA de **DevSlayer × Brad Society**. Il référence des applications web et redirige vers leur URL publique, sans stocker d’APK.
 
-## Fonctionnalités V1
+## Fonctionnalités
 
-- Accueil avec sélection à la une, tendances, nouveautés et recherche.
-- Catégories : Outils, Jeux, Éducation, Finance, Transport, Actualités, Communauté.
-- Fiche d’application avec icône, développeur, description, captures, note et lien externe.
-- Page À propos pour DevSlayer et Brad Society.
-- Back-office `/admin` protégé par `ADMIN_PASSWORD` pour ajouter, modifier et supprimer des apps.
-- PWA installable avec `manifest.webmanifest`, icône et service worker.
-- Neuf applications fictives incluses dans `prisma/seed.ts`.
+- Interface claire, compacte et mobile-first, inspirée des stores d’applications, avec recherche, catégories, rails horizontaux et navigation basse sur mobile.
+- Fiches d’applications avec icône, développeur, statistiques, captures, description et bouton **Ouvrir**.
+- Comptes développeurs faits maison : inscription, connexion, déconnexion et session par cookie signé avec `SESSION_SECRET`.
+- Espace `/developer` : soumission, édition et suivi des apps personnelles. Les nouvelles apps sont `PENDING` et restent invisibles jusqu’à validation.
+- Back-office `/admin` protégé par `ADMIN_PASSWORD` : validation, refus, suppression des apps et suppression des avis.
+- Avis visiteurs : pseudo, note de 1 à 5, commentaire, cookie anonyme unique par app et limitation d’une publication par heure.
+- Les neuf apps historiques sont conservées et leur statut existant est `APPROVED` par défaut.
 
 ## Lancer en local
 
-Prérequis : Node.js 18+, npm et une base PostgreSQL.
+Prérequis : Node.js 18+, npm et PostgreSQL.
 
 ```bash
 npm install
 cp .env.example .env
-# renseigner DATABASE_URL et ADMIN_PASSWORD
-npx prisma db push
-npm run db:seed
+# renseigner DATABASE_URL, ADMIN_PASSWORD et SESSION_SECRET
+npm run db:push
 npm run dev
 ```
 
-Puis ouvrir [http://localhost:3000](http://localhost:3000). Si la base n’est pas encore disponible, l’interface affiche automatiquement le catalogue de démonstration ; les écritures admin nécessitent une base accessible.
+Le build exécute `prisma db push`, `prisma generate`, puis `next build`. Il n’exécute jamais de seed.
 
 ## Variables d’environnement
 
-- `DATABASE_URL` : URL PostgreSQL, fournie par Railway.
-- `ADMIN_PASSWORD` : mot de passe du back-office. Ne jamais le committer.
-- `NEXT_PUBLIC_STORE_URL` : URL publique facultative du store.
+- `DATABASE_URL` : URL PostgreSQL Supabase.
+- `ADMIN_PASSWORD` : mot de passe du back-office.
+- `SESSION_SECRET` : secret utilisé pour signer les sessions développeurs et admin.
 
-## Déploiement Railway
+Aucune autre variable n’est nécessaire.
 
-1. Créer un projet Railway et ajouter un service PostgreSQL.
-2. Ajouter un service **GitHub Repo** lié à `desmonddavy593-cloud/Bradslayer-`.
-3. Configurer les variables `DATABASE_URL` (référence Railway du service PostgreSQL), `ADMIN_PASSWORD` et éventuellement `NEXT_PUBLIC_STORE_URL`.
-4. Railway détecte automatiquement Next.js via le `package.json` et utilise `npm run build` puis `npm start`.
-5. Après le premier déploiement, exécuter `npx prisma db push` puis `npm run db:seed` dans un shell Railway, ou ajouter une étape de release selon votre configuration.
+## Déploiement Vercel
 
-Le projet est prêt pour les déploiements automatiques à chaque push sur `main`.
-
-## V2 prévue
-
-Paiements, comptes utilisateurs, comptes développeurs, soumission d’applications, analytics et avis utilisateurs pourront être ajoutés dans une prochaine version.
+Le dépôt GitHub `desmonddavy593-cloud/Bradslayer-` est relié à Vercel : chaque push sur `main` déclenche un déploiement. Les variables ci-dessus doivent être configurées dans Vercel. La commande de build met à jour le schéma avec `prisma db push` sans supprimer les colonnes ou tables existantes et sans seed.

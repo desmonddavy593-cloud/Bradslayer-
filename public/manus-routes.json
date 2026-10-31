@@ -1,1 +1,1 @@
-{"routes":[{"path":"/","title":"BradSlayer Store"},{"path":"/categories","title":"Catégories"},{"path":"/app/:slug","title":"Fiche application"},{"path":"/about","title":"À propos"},{"path":"/admin","title":"Administration"}]}
+{"routes":[{"path":"/","title":"Accueil"},{"path":"/categories","title":"Catégories"},{"path":"/app/:slug","title":"Fiche application"},{"path":"/about","title":"À propos"},{"path":"/account","title":"Compte"},{"path":"/developer","title":"Espace développeur"},{"path":"/admin","title":"Administration"}]}

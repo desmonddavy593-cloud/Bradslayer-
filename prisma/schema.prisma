@@ -7,6 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  passwordHash String
+  name      String
+  role      String   @default("DEVELOPER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  apps      App[]
+}
+
 model App {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -23,7 +34,30 @@ model App {
   screenshots String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  shortDescription String?
+  longDescription  String?
+  iconUrl     String?
+  status      String   @default("APPROVED")
+  developerId String?
+  owner       User?    @relation(fields: [developerId], references: [id], onDelete: SetNull)
+  reviews     Review[]
 
   @@index([category])
   @@index([createdAt])
+  @@index([status])
+  @@index([developerId])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  appId      String
+  app        App     @relation(fields: [appId], references: [id], onDelete: Cascade)
+  nickname   String
+  comment    String
+  rating     Int
+  visitorId  String
+  createdAt  DateTime @default(now())
+
+  @@unique([appId, visitorId])
+  @@index([appId, createdAt])
 }
