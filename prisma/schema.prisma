@@ -41,6 +41,7 @@ model App {
   developerId String?
   owner       User?    @relation(fields: [developerId], references: [id], onDelete: SetNull)
   reviews     Review[]
+  events      AppEvent[]
 
   @@index([category])
   @@index([createdAt])
@@ -60,4 +61,16 @@ model Review {
 
   @@unique([appId, visitorId])
   @@index([appId, createdAt])
+}
+
+model AppEvent {
+  id        String   @id @default(cuid())
+  appId     String
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  type      String
+  visitorId String
+  createdAt DateTime @default(now())
+
+  @@index([appId, type, createdAt])
+  @@index([visitorId, appId, type, createdAt])
 }

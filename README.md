@@ -5,12 +5,21 @@ BradSlayer Store est le store PWA de **DevSlayer × Brad Society**. Il référen
 ## Fonctionnalités
 
 - Interface claire, compacte et mobile-first, inspirée des stores d’applications, avec recherche, catégories, rails horizontaux et navigation basse sur mobile.
-- Fiches d’applications avec icône, développeur, statistiques, captures, description et bouton **Ouvrir**.
+- PWA installable : manifeste clair, service worker versionné et bouton **Installer BradSlayer** affiché uniquement quand le navigateur fournit `beforeinstallprompt`.
+- Fiches d’applications avec icône, développeur, statistiques, captures, description, bouton principal **Ouvrir**, favori et aide « Ajouter à l’écran d’accueil » pour Android Chrome et iPhone Safari. L’installation d’une app externe reste manuelle dans son propre onglet.
 - Comptes développeurs faits maison : inscription, connexion, déconnexion et session par cookie signé avec `SESSION_SECRET`.
-- Espace `/developer` : soumission, édition et suivi des apps personnelles. Les nouvelles apps sont `PENDING` et restent invisibles jusqu’à validation.
-- Back-office `/admin` protégé par `ADMIN_PASSWORD` : validation, refus, suppression des apps et suppression des avis.
-- Avis visiteurs : pseudo, note de 1 à 5, commentaire, cookie anonyme unique par app et limitation d’une publication par heure.
+- Espace `/developer` : soumission et suivi des apps personnelles, vues/ouvertures sur 7 jours, 30 jours et total, avec mini-graphique quotidien. Les nouvelles apps sont `PENDING` et restent invisibles jusqu’à validation.
+- Tracking : vue de fiche dédoublonnée par visiteur, application et fenêtre d’une heure ; ouvertures enregistrées par app et par jour.
+- Back-office `/admin` protégé par `ADMIN_PASSWORD` : validation, refus, suppression des apps et des avis, résumé global des vues, ouvertures et apps les plus vues.
+- Favoris et apps ouvertes récemment stockés uniquement dans `localStorage`, sans compte, accessibles depuis `/my-apps`.
+- Avis visiteurs : pseudo, note de 1 à 5, cookie anonyme unique par app et limitation d’une publication par heure.
 - Les neuf apps historiques sont conservées et leur statut existant est `APPROVED` par défaut.
+
+## Nouvelles tables Prisma V3
+
+- `AppEvent` : événements `VIEW` et `OPEN`, visiteur anonyme, app et date.
+
+Les tables déjà présentes (`User`, `App`, `Review`) sont conservées. Aucune table ni colonne existante n’est supprimée. La RLS Supabase devra être activée séparément sur les tables applicatives, notamment `AppEvent`.
 
 ## Lancer en local
 

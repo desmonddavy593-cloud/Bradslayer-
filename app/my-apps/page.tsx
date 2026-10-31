@@ -1,0 +1,2 @@
+import {getApps} from '@/lib/db';import {StoreApp} from '../components';import MyAppsClient from './my-apps-client';
+export default async function MyApps(){const apps=await getApps() as StoreApp[];return <div className="page-shell inner-page"><div className="page-intro"><span className="eyebrow gold">SUR CET APPAREIL</span><h1>Mes apps</h1><p>Vos favoris et vos ouvertures récentes sont conservés uniquement dans ce navigateur.</p></div><MyAppsClient apps={apps}/></div>}
