@@ -46,3 +46,7 @@ Aucune autre variable n’est nécessaire.
 ## Déploiement Vercel
 
 Le dépôt GitHub `desmonddavy593-cloud/Bradslayer-` est relié à Vercel : chaque push sur `main` déclenche un déploiement. Les variables ci-dessus doivent être configurées dans Vercel. La commande de build met à jour le schéma avec `prisma db push` sans supprimer les colonnes ou tables existantes et sans seed.
+
+## Interface mobile V4 inspirée du tutoriel
+
+L’accueil mobile reprend la structure observée dans la vidéo fournie : barre de recherche arrondie, puces horizontales, grands panneaux promotionnels, rayons horizontaux, cinq onglets (`Jeux`, `Applis`, `Recherche`, `Livres`, `Vous`), panneau de profil en bas, notifications, suggestions de recherche et filtres. Les codes de Google Play sont adaptés à BradSlayer : contenu DevSlayer × Brad Society, couleurs de marque et liens vers les apps web. La barre système du téléphone et le chrome natif du navigateur restent contrôlés par Android/iOS et ne peuvent pas être remplacés par le site.
