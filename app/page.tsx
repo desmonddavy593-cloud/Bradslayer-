@@ -1,0 +1,11 @@
+import Link from 'next/link';
+import { getApps } from '@/lib/db';
+import { AppRail, StoreApp } from './components';
+
+export default async function Home({ searchParams }:{ searchParams:{q?:string; category?:string} }) {
+  const all = await getApps() as StoreApp[]; const q=(searchParams.q||'').toLowerCase(); const cat=searchParams.category||'';
+  const filtered = all.filter(a => (!q || `${a.name} ${a.developer} ${a.description}`.toLowerCase().includes(q)) && (!cat || a.category===cat));
+  const featured=all.filter(a=>a.featured).slice(0,4); const trending=all.filter(a=>a.trending).slice(0,6); const latest=all.slice(0,6);
+  return <div className="page-shell"><section className="hero"><div className="hero-copy"><span className="pill">LE STORE DES COMMUNAUTÉS</span><h1>Le web, <em>en mieux.</em></h1><p>Découvrez des applications web utiles, belles et pensées pour avancer. Une sélection signée DevSlayer × Brad Society.</p><form className="search" action="/"><span>⌕</span><input name="q" defaultValue={searchParams.q} placeholder="Rechercher une app..."/><button>Explorer</button></form></div><div className="hero-art"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="hero-tile"><span>✦</span><strong>BS</strong><small>curated<br/>for you</small></div></div></section>
+  {(q||cat) ? <section className="results"><div className="section-heading"><div><span className="eyebrow gold">RÉSULTATS</span><h2>{filtered.length} application{filtered.length>1?'s':''}</h2></div><Link href="/">Réinitialiser</Link></div>{filtered.length ? <div className="app-grid">{filtered.map(app=><div key={app.id}><AppRail title="" apps={[app]}/></div>)}</div> : <div className="empty">Aucune app ne correspond à votre recherche.</div>}</section> : <><AppRail eyebrow="LA SÉLECTION" title="À la une" apps={featured}/><section className="category-strip"><span className="eyebrow">EXPLORER PAR UNIVERS</span>{['Outils','Jeux','Éducation','Finance','Transport','Actualités','Communauté'].map(c=><Link key={c} href={`/?category=${encodeURIComponent(c)}`}>{c}<span>↗</span></Link>)}</section><AppRail eyebrow="CE QUI BOUGE" title="Tendances" apps={trending}/><AppRail eyebrow="FRAÎCHEMENT ARRIVÉ" title="Nouveautés" apps={latest}/></>}</div>
+}

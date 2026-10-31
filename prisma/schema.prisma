@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model App {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  developer   String
+  category    String
+  description String
+  icon        String
+  accent      String   @default("#7B2FF7")
+  rating      Float    @default(4.5)
+  featured    Boolean  @default(false)
+  trending    Boolean  @default(false)
+  url         String
+  screenshots String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([createdAt])
+}
