@@ -66,3 +66,22 @@ Les seuls textes de marque visibles dans l’application sont désormais ceux de
 L’accueil utilise désormais un seul champ de saisie dans l’en-tête. Le focus ouvre la vue Recherche sans dupliquer le champ ; les résultats et suggestions apparaissent dessous. La recherche vocale n’est affichée que si le navigateur fournit Web Speech API. Les filtres Premium et Enfants, les événements et l’onglet Guides ne sont affichés que lorsqu’ils disposent de données réelles.
 
 Le service worker `bradslayer-v4` utilise le réseau en premier, conserve un repli hors ligne, supprime les anciens caches à l’activation, appelle `skipWaiting` et `clients.claim`, puis recharge la page lorsqu’une nouvelle version prend la main.
+
+
+## V3 — Modération et communauté
+
+Le back-office `/admin` dispose maintenant d’un menu latéral responsive : tableau de bord, applications, validation, utilisateurs, signalements, apps refusées, statistiques, annonces/guides et messages d’aide. Les routes admin vérifient la session signée avec `SESSION_SECRET` et restent protégées par `ADMIN_PASSWORD`.
+
+La fiche d’application propose désormais **J’aime** (un vote par visiteur et par app) et **Signaler** avec les motifs App cassée, Contenu dangereux, Arnaque ou fausse app et Autre. Le suivi accepte aussi l’événement `DOWNLOAD`, affiché à 0 tant que les fichiers d’apps ne sont pas disponibles.
+
+### Schéma ajouté
+
+- Colonnes optionnelles sur `User` : `suspendedAt`.
+- Colonnes optionnelles sur `App` : `rejectionReason`, `reviewedAt`, `hiddenAt`.
+- Nouvelle table `AppLike` : app, visiteur anonyme, date, unicité app + visiteur.
+- Nouvelle table `Report` : app, motif, message facultatif, visiteur anonyme, statut et date.
+- Nouvelle table `AdminLog` : action, cible et date.
+
+Le fichier `prisma/supabase-rls.sql` contient l’activation RLS et les politiques minimales à appliquer dans Supabase. Il n’est pas lancé automatiquement par `prisma db push`, afin de ne pas rendre le build destructif. Les colonnes sont toutes facultatives ou dotées d’une valeur par défaut ; aucune donnée existante n’est supprimée.
+
+La V3 laisse encore à compléter côté produit : graphiques journaliers détaillés sur 7/30/90 jours, export CSV, vraie vue séparée Visiteurs, masquage d’app dans toutes les listes publiques et workflow de refus avec écran dédié.

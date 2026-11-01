@@ -16,6 +16,7 @@ model User {
   role      String   @default("DEVELOPER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  suspendedAt DateTime?
   apps      App[]
   announcementReads AnnouncementRead[]
   helpComments HelpComment[]
@@ -42,10 +43,15 @@ model App {
   iconUrl     String?
   priceXof    Int?
   status      String   @default("APPROVED")
+  rejectionReason String?
+  reviewedAt DateTime?
+  hiddenAt DateTime?
   developerId String?
   owner       User?    @relation(fields: [developerId], references: [id], onDelete: SetNull)
   reviews     Review[]
   events      AppEvent[]
+  likes       AppLike[]
+  reports     Report[]
 
   @@index([category])
   @@index([createdAt])
@@ -125,4 +131,36 @@ model Guide {
 
   @@index([createdAt])
   @@index([category])
+}
+
+model AppLike {
+  id        String   @id @default(cuid())
+  appId     String
+  visitorId String
+  createdAt DateTime @default(now())
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  @@unique([appId, visitorId])
+  @@index([appId, createdAt])
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  appId     String
+  reason    String
+  message   String?
+  visitorId String
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  @@index([status, createdAt])
+  @@index([appId, createdAt])
+  @@unique([appId, visitorId, createdAt])
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  action    String
+  target    String
+  createdAt DateTime @default(now())
+  @@index([createdAt])
 }
