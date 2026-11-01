@@ -40,6 +40,7 @@ model App {
   shortDescription String?
   longDescription  String?
   iconUrl     String?
+  priceXof    Int?
   status      String   @default("APPROVED")
   developerId String?
   owner       User?    @relation(fields: [developerId], references: [id], onDelete: SetNull)
@@ -50,6 +51,7 @@ model App {
   @@index([createdAt])
   @@index([status])
   @@index([developerId])
+  @@index([priceXof])
 }
 
 model Review {
@@ -110,4 +112,17 @@ model HelpComment {
 
   @@index([createdAt])
   @@index([userId])
+}
+
+model Guide {
+  id        String   @id @default(cuid())
+  title     String
+  excerpt   String
+  content   String
+  category  String   @default("Tutoriel")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([category])
 }

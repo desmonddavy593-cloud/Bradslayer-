@@ -60,3 +60,9 @@ Les développeurs s’inscrivent désormais avec un pseudo unique et un mot de p
 Nouvelles tables V4 : `Announcement`, `AnnouncementRead` et `HelpComment`. Elles devront recevoir leurs politiques RLS Supabase après déploiement.
 
 Les seuls textes de marque visibles dans l’application sont désormais ceux de BradSlayer, DevSlayer et Brad Society ; les libellés hérités de la référence ont été adaptés.
+
+## Recherche, filtres et service worker
+
+L’accueil utilise désormais un seul champ de saisie dans l’en-tête. Le focus ouvre la vue Recherche sans dupliquer le champ ; les résultats et suggestions apparaissent dessous. La recherche vocale n’est affichée que si le navigateur fournit Web Speech API. Les filtres Premium et Enfants, les événements et l’onglet Guides ne sont affichés que lorsqu’ils disposent de données réelles.
+
+Le service worker `bradslayer-v4` utilise le réseau en premier, conserve un repli hors ligne, supprime les anciens caches à l’activation, appelle `skipWaiting` et `clients.claim`, puis recharge la page lorsqu’une nouvelle version prend la main.
