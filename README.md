@@ -85,3 +85,14 @@ La fiche d’application propose désormais **J’aime** (un vote par visiteur e
 Le fichier `prisma/supabase-rls.sql` contient l’activation RLS et les politiques minimales à appliquer dans Supabase. Il n’est pas lancé automatiquement par `prisma db push`, afin de ne pas rendre le build destructif. Les colonnes sont toutes facultatives ou dotées d’une valeur par défaut ; aucune donnée existante n’est supprimée.
 
 La V3 laisse encore à compléter côté produit : graphiques journaliers détaillés sur 7/30/90 jours, export CSV, vraie vue séparée Visiteurs, masquage d’app dans toutes les listes publiques et workflow de refus avec écran dédié.
+
+
+## APK Android et installation
+
+Les développeurs peuvent importer un fichier `.apk` de 50 Mo maximum depuis `/developer`. Le navigateur vérifie l’extension, la taille et la signature ZIP `PK`, calcule l’empreinte SHA-256, demande une URL d’envoi signée au serveur puis envoie directement le fichier dans le bucket privé Supabase `apks`. Le fichier ne transite pas par une route Next.js/Vercel.
+
+Après validation admin, la fiche publique affiche **Installer l’application**. Le serveur vérifie le statut de l’app, enregistre au plus un événement `DOWNLOAD` par visiteur et par heure et fournit une URL de téléchargement signée de 60 secondes. Le navigateur lit le flux progressivement, affiche le pourcentage et enregistre le fichier sous le nom de l’application.
+
+Nouvelles colonnes facultatives sur `App` : `apkPath`, `apkSize`, `apkSha256`, `apkOriginalName`, `versionName`. Aucune table supplémentaire n’est utilisée pour les APK. Les variables serveur nécessaires sont `SUPABASE_URL` et `SUPABASE_SECRET_KEY`; cette dernière n’est jamais envoyée au navigateur.
+
+À vérifier dans l’environnement Vercel/Supabase : appliquer la migration Prisma avec la vraie `DATABASE_URL`, confirmer le bucket privé `apks` et tester les endpoints signés avec les variables `SUPABASE_URL` et `SUPABASE_SECRET_KEY`. Ces opérations réseau Supabase n’ont pas pu être testées avec un stockage de production depuis le sandbox.

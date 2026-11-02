@@ -10,6 +10,7 @@ import {
 } from "../../store-client";
 import ReviewForm from "./review-form";
 import { CommunityActions } from "./community-actions";
+import ApkDownload from "./apk-download";
 export default async function AppDetail({
   params,
 }: {
@@ -54,8 +55,7 @@ export default async function AppDetail({
             </div>
           </div>
           <div className="detail-actions">
-            <TrackOpenButton appId={app.id} url={app.url} />
-            <AddToHomeScreen url={app.url} />
+            {app.apkPath ? <ApkDownload appId={app.id} name={app.name} /> : <><TrackOpenButton appId={app.id} url={app.url} /><AddToHomeScreen url={app.url} /></>}
           </div>
           <CommunityActions
             appId={app.id}

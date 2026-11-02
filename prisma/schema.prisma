@@ -46,6 +46,11 @@ model App {
   rejectionReason String?
   reviewedAt DateTime?
   hiddenAt DateTime?
+  apkPath String?
+  apkSize Int?
+  apkSha256 String?
+  apkOriginalName String?
+  versionName String?
   developerId String?
   owner       User?    @relation(fields: [developerId], references: [id], onDelete: SetNull)
   reviews     Review[]

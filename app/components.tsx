@@ -17,6 +17,9 @@ export type StoreApp = {
   url: string;
   screenshots: string[];
   priceXof?: number | null;
+  apkPath?: string | null;
+  apkSize?: number | null;
+  versionName?: string | null;
   createdAt: Date;
   reviews?: any[];
   _count?: { likes?: number; reports?: number };
