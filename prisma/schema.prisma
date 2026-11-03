@@ -20,6 +20,7 @@ model User {
   bio       String?
   website   String?
   community String?
+  accountStatus String @default("APPROVED")
   apps      App[]
   announcementReads AnnouncementRead[]
   helpComments HelpComment[]

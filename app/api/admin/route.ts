@@ -44,6 +44,13 @@ export async function POST(req: Request) {
       );
       return NextResponse.json(app);
     }
+    if (b.action === "accountStatus") {
+      const status = ["PENDING", "APPROVED", "REJECTED"].includes(b.status) ? b.status : "PENDING";
+      const user = await prisma.user.update({ where: { id: b.id }, data: { accountStatus: status } });
+      await prisma.announcement.create({ data: { title: status === "APPROVED" ? "Compte validé" : status === "REJECTED" ? "Compte refusé" : "Compte en attente", text: status === "APPROVED" ? "Votre compte développeur a été validé par l’équipe." : status === "REJECTED" ? `Votre compte développeur a été refusé${b.reason ? ` : ${String(b.reason).slice(0, 300)}` : "."}` : "Votre compte développeur est en cours de validation." } });
+      await log("ACCOUNT_" + status, b.id);
+      return NextResponse.json(user);
+    }
     if (b.action === "suspend") {
       const user = await prisma.user.update({
         where: { id: b.id },
