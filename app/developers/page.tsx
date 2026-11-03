@@ -41,12 +41,12 @@ export default function Developers() {
       <div className="page-shell inner-page developer-home">
         <div className="page-intro">
           <span className="eyebrow gold">ESPACE DÉVELOPPEUR</span>
-          <h1>Bonjour,<br /><span className="safe-username">{user.username || user.name}</span>.</h1>
+          <h1>Bonjour,<br /><span className="safe-username">{user.username || user.name}</span></h1>
           <p>Votre session reste active pendant 90 jours, jusqu’à votre déconnexion.</p>
           {status !== 'APPROVED' && <div className={`account-status-alert ${status?.toLowerCase()}`}>{status === 'REJECTED' ? 'Compte refusé.' : 'Compte en attente de validation.'} {status === 'PENDING' && 'Vous pourrez publier après approbation.'}</div>}
         </div>
         <div className="developer-dashboard">
-          <div className="dashboard-actions"><Link className="primary-open" href="/developer/apps">Gérer mes apps</Link><Link className="secondary-button" href="/developer">Ajouter une app</Link><button className="button" onClick={logout}>Se déconnecter</button></div>
+          <div className="dashboard-actions"><Link className="primary-open" href="/developer/apps">Gérer mes apps</Link><Link className="secondary-button" href="/developer/publish">Ajouter une app</Link><button className="button" onClick={logout}>Se déconnecter</button></div>
           <div className="developer-list">{apps.length ? apps.map((a) => <div className="admin-item" key={a.id}><div><strong>{a.name}</strong><small>{a.category}</small></div><span className={`status ${a.status.toLowerCase()}`}>{a.status === 'APPROVED' ? 'Validée' : a.status === 'REJECTED' ? 'Refusée' : 'En attente'}</span></div>) : <div className="empty-card">Aucune application pour le moment.</div>}</div>
         </div>
       </div>

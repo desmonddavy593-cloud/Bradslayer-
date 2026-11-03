@@ -21,9 +21,11 @@ model User {
   website   String?
   community String?
   accountStatus String @default("APPROVED")
+  avatar    String?
   apps      App[]
   announcementReads AnnouncementRead[]
   helpComments HelpComment[]
+  contactMessages ContactMessage[]
 }
 
 model App {
@@ -172,4 +174,18 @@ model AdminLog {
   target    String
   createdAt DateTime @default(now())
   @@index([createdAt])
+}
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  userId      String
+  subject     String
+  message     String
+  status      String   @default("NEW")
+  adminReply  String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
 }

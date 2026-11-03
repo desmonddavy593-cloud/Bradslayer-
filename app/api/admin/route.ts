@@ -59,6 +59,13 @@ export async function POST(req: Request) {
       await log(b.value ? "USER_SUSPENDED" : "USER_REACTIVATED", b.id);
       return NextResponse.json(user);
     }
+    if (b.action === "contact") {
+      const status = ["NEW", "READ", "DONE"].includes(b.status) ? b.status : undefined;
+      const message = await prisma.contactMessage.update({ where: { id: b.id }, data: { ...(status ? { status } : {}), ...(b.reply !== undefined ? { adminReply: String(b.reply).slice(0, 1000), status: "READ" } : {}) }, include: { user: { select: { id: true, username: true } } } });
+      if (b.reply !== undefined) await prisma.announcement.create({ data: { title: "Réponse de l’administration", text: `Une réponse est disponible pour votre message « ${message.subject} ».` } });
+      await log("CONTACT_" + (b.reply !== undefined ? "REPLIED" : status || "UPDATED"), b.id);
+      return NextResponse.json(message);
+    }
     if (b.action === "report") {
       const report = await prisma.report.update({
         where: { id: b.id },
@@ -119,6 +126,7 @@ export async function GET() {
     apps,
     users,
     reports,
+    contactMessages,
     announcements,
     helpComments,
     guides,
@@ -140,6 +148,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       include: { app: true },
     }),
+    prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" }, include: { user: { select: { username: true, email: true } } } }),
     prisma.announcement.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.helpComment.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.guide.findMany({ orderBy: { createdAt: "desc" } }),
@@ -167,6 +176,7 @@ export async function GET() {
     apps,
     users,
     reports,
+    contactMessages,
     announcements,
     helpComments,
     guides,
