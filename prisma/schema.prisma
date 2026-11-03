@@ -21,6 +21,7 @@ model User {
   website   String?
   community String?
   accountStatus String @default("APPROVED")
+  accountReason String?
   avatar    String?
   apps      App[]
   announcementReads AnnouncementRead[]

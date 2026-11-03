@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     }
     if (b.action === "accountStatus") {
       const status = ["PENDING", "APPROVED", "REJECTED"].includes(b.status) ? b.status : "PENDING";
-      const user = await prisma.user.update({ where: { id: b.id }, data: { accountStatus: status } });
+      const user = await prisma.user.update({ where: { id: b.id }, data: { accountStatus: status, accountReason: status === "REJECTED" ? String(b.reason || "").slice(0, 500) || null : null } });
       await prisma.announcement.create({ data: { title: status === "APPROVED" ? "Compte validé" : status === "REJECTED" ? "Compte refusé" : "Compte en attente", text: status === "APPROVED" ? "Votre compte développeur a été validé par l’équipe." : status === "REJECTED" ? `Votre compte développeur a été refusé${b.reason ? ` : ${String(b.reason).slice(0, 300)}` : "."}` : "Votre compte développeur est en cours de validation." } });
       await log("ACCOUNT_" + status, b.id);
       return NextResponse.json(user);
@@ -56,6 +56,7 @@ export async function POST(req: Request) {
         where: { id: b.id },
         data: { suspendedAt: b.value ? new Date() : null },
       });
+      await prisma.announcement.create({ data: { title: b.value ? "Compte suspendu" : "Compte réactivé", text: b.value ? "Votre compte développeur a été suspendu par l’administration." : "Votre compte développeur a été réactivé." } });
       await log(b.value ? "USER_SUSPENDED" : "USER_REACTIVATED", b.id);
       return NextResponse.json(user);
     }
@@ -162,6 +163,8 @@ export async function GET() {
     rejected: apps.filter((a) => a.status === "REJECTED").length,
     developers: users.length,
     openReports: reports.filter((r) => r.status === "OPEN").length,
+    pendingDevelopers: users.filter((u) => u.accountStatus === "PENDING").length,
+    newMessages: contactMessages.filter((m) => m.status === "NEW").length,
     likes,
     totalViews: Object.values(stats).reduce(
       (n: any, s: any) => n + s.views.total,
