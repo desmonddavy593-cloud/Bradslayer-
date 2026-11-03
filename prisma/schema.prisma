@@ -23,10 +23,12 @@ model User {
   accountStatus String @default("APPROVED")
   accountReason String?
   avatar    String?
+  isOfficial Boolean @default(false)
   apps      App[]
   announcementReads AnnouncementRead[]
   helpComments HelpComment[]
   contactMessages ContactMessage[]
+  chatThreads ChatThread[]
 }
 
 model App {
@@ -51,6 +53,7 @@ model App {
   priceXof    Int?
   status      String   @default("APPROVED")
   rejectionReason String?
+  isOfficial Boolean @default(false)
   reviewedAt DateTime?
   hiddenAt DateTime?
   apkPath String?
@@ -189,4 +192,52 @@ model ContactMessage {
 
   @@index([status, createdAt])
   @@index([userId, createdAt])
+}
+
+model AdminProfile {
+  id           String   @id @default(cuid())
+  displayName  String
+  avatar       String?
+  title        String   @default("Support")
+  active       Boolean  @default(true)
+  doNotDisturb Boolean  @default(false)
+  lastSeenAt   DateTime?
+  createdAt    DateTime @default(now())
+  chatThreads  ChatThread[]
+}
+
+model ChatThread {
+  id            String       @id @default(cuid())
+  userId        String
+  adminId       String
+  status        String       @default("OPEN")
+  lastMessageAt DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  admin         AdminProfile @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  messages      ChatMessage[]
+  @@unique([userId, adminId, status])
+  @@index([adminId, status, lastMessageAt])
+}
+
+model ChatMessage {
+  id        String     @id @default(cuid())
+  threadId  String
+  sender    String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime   @default(now())
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  @@index([threadId, createdAt])
+}
+
+model AdminNotification {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  @@index([readAt, createdAt])
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { adminCookie, isAdmin, ADMIN_COOKIE } from "@/lib/auth";
+import { adminCookie, isAdmin, ADMIN_COOKIE, ADMIN_PROFILE_COOKIE, adminProfileCookie, readAdminProfile } from "@/lib/auth";
 import { getStats } from "@/lib/stats";
 const log = async (action: string, target: string) => {
   try {
@@ -22,14 +22,25 @@ export async function POST(req: Request) {
     r.cookies.set(adminCookie());
     return r;
   }
+  if (b.action === "selectProfile") {
+    if (!isAdmin()) return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
+    const profile = await prisma.adminProfile.findUnique({ where: { id: String(b.id) } });
+    if (!profile || !profile.active) return NextResponse.json({ error: "Profil indisponible." }, { status: 400 });
+    const r = NextResponse.json(profile); r.cookies.set(adminProfileCookie(profile.id)); return r;
+  }
   if (!isAdmin())
     return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
   if (b.action === "logout") {
     const r = NextResponse.json({ ok: true });
     r.cookies.delete(ADMIN_COOKIE);
+    r.cookies.delete(ADMIN_PROFILE_COOKIE);
     return r;
   }
+  if (b.action === "presence") { const id=readAdminProfile(); if(id) await prisma.adminProfile.updateMany({where:{id,active:true},data:{lastSeenAt:new Date()}}); return NextResponse.json({ok:true}); }
+  if (b.action === "profileLogout") { const id=readAdminProfile(); if(id) await prisma.adminProfile.updateMany({where:{id},data:{lastSeenAt:null}}); const r=NextResponse.json({ok:true}); r.cookies.delete(ADMIN_PROFILE_COOKIE); return r; }
   try {
+    if (b.action === "official") { const value=Boolean(b.value); const result=b.kind==='user'?await prisma.user.update({where:{id:b.id},data:{isOfficial:value}}):await prisma.app.update({where:{id:b.id},data:{isOfficial:value}}); await prisma.announcement.create({data:{title:value?'Badge officiel attribué':'Badge officiel retiré',text:value?'BradSlayer vous a attribué le badge Officiel.':'Le badge Officiel a été retiré.'}}); await log(value?'OFFICIAL_GRANTED':'OFFICIAL_REMOVED',b.id); return NextResponse.json(result); }
+    if (b.action === "profile") { const data={displayName:String(b.displayName||'').trim().slice(0,80),avatar:b.avatar?String(b.avatar).slice(0,300000):null,title:String(b.title||'Support').slice(0,80),active:b.active!==false,doNotDisturb:Boolean(b.doNotDisturb)}; const profile=b.id?await prisma.adminProfile.update({where:{id:b.id},data}):await prisma.adminProfile.create({data}); return NextResponse.json(profile); }
     if (b.action === "status") {
       const data: any = {
         status: b.status,
@@ -133,6 +144,8 @@ export async function GET() {
     guides,
     logs,
     likes,
+    profiles,
+    notifications,
   ] = await Promise.all([
     prisma.app.findMany({
       orderBy: { createdAt: "desc" },
@@ -155,6 +168,8 @@ export async function GET() {
     prisma.guide.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.adminLog.findMany({ orderBy: { createdAt: "desc" }, take: 30 }),
     prisma.appLike.count(),
+    prisma.adminProfile.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.adminNotification.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
   ]);
   const stats = await getStats(apps.map((a) => a.id));
   const summary = {
@@ -165,6 +180,7 @@ export async function GET() {
     openReports: reports.filter((r) => r.status === "OPEN").length,
     pendingDevelopers: users.filter((u) => u.accountStatus === "PENDING").length,
     newMessages: contactMessages.filter((m) => m.status === "NEW").length,
+    unreadNotifications: notifications.filter((n) => !n.readAt).length,
     likes,
     totalViews: Object.values(stats).reduce(
       (n: any, s: any) => n + s.views.total,
@@ -184,6 +200,9 @@ export async function GET() {
     helpComments,
     guides,
     logs,
+    profiles,
+    notifications,
+    selectedProfile: readAdminProfile(),
     summary,
   });
 }

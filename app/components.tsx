@@ -1,4 +1,5 @@
 import Link from "next/link";
+import OfficialBadge from "./components/official-badge";
 export type StoreApp = {
   id: string;
   slug: string;
@@ -23,6 +24,7 @@ export type StoreApp = {
   createdAt: Date;
   reviews?: any[];
   _count?: { likes?: number; reports?: number };
+  isOfficial?: boolean;
 };
 export function AppIcon({
   app,
@@ -47,7 +49,7 @@ export function AppCard({ app }: { app: StoreApp }) {
       <div className="app-card-copy">
         <div className="eyebrow">{app.category}</div>
         <h3>{app.name}</h3>
-        <p>{app.developer}</p>
+        <p>{app.developer} {app.isOfficial&&<OfficialBadge size={16}/>}</p>
         <span className="rating">★ {app.rating.toFixed(1)}</span>
       </div>
     </Link>

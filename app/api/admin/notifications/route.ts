@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/db';import {isAdmin} from '@/lib/auth';
+export async function GET(){if(!isAdmin())return NextResponse.json({error:'Non autorisé.'},{status:401});return NextResponse.json(await prisma.adminNotification.findMany({orderBy:{createdAt:'desc'},take:100}))}
+export async function POST(req:Request){if(!isAdmin())return NextResponse.json({error:'Non autorisé.'},{status:401});const b=await req.json();if(b.all)await prisma.adminNotification.updateMany({where:{readAt:null},data:{readAt:new Date()}});else if(b.id)await prisma.adminNotification.update({where:{id:b.id},data:{readAt:new Date()}});return NextResponse.json({ok:true})}

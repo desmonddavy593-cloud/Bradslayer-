@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/db";
+import { notifyAdmin } from "@/lib/admin-notify";
 const reasons = [
   "App cassée",
   "Contenu dangereux",
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
       message: String(b.message || "").slice(0, 500),
     },
   });
+  await notifyAdmin("REPORT_NEW", "Nouveau signalement", `${app.name} : ${b.reason}`, "/admin/reports");
   const response = NextResponse.json({ ok: true });
   response.cookies.set("bradslayer_analytics_visitor", visitorId, {
     httpOnly: true,

@@ -11,6 +11,7 @@ import {
 import ReviewForm from "./review-form";
 import { CommunityActions } from "./community-actions";
 import ApkDownload from "./apk-download";
+import OfficialBadge from "../../components/official-badge";
 export default async function AppDetail({
   params,
 }: {
@@ -38,7 +39,7 @@ export default async function AppDetail({
           <span className="eyebrow gold">{app.category}</span>
           <h1>{app.name}</h1>
           <p className="developer">
-            par <strong>{app.developer}</strong>
+            par <strong>{app.developer}</strong> {app.isOfficial&&<OfficialBadge size={16}/>} 
           </p>
           <div className="detail-stats">
             <div>
