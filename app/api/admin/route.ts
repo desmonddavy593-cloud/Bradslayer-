@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   if (b.action === "presence") { const id=readAdminProfile(); if(id) await prisma.adminProfile.updateMany({where:{id,active:true},data:{lastSeenAt:new Date()}}); return NextResponse.json({ok:true}); }
   if (b.action === "profileLogout") { const id=readAdminProfile(); if(id) await prisma.adminProfile.updateMany({where:{id},data:{lastSeenAt:null}}); const r=NextResponse.json({ok:true}); r.cookies.delete(ADMIN_PROFILE_COOKIE); return r; }
   try {
-    if (b.action === "official") { const value=Boolean(b.value); const result=b.kind==='user'?await prisma.user.update({where:{id:b.id},data:{isOfficial:value}}):await prisma.app.update({where:{id:b.id},data:{isOfficial:value}}); await prisma.announcement.create({data:{title:value?'Badge officiel attribué':'Badge officiel retiré',text:value?'BradSlayer vous a attribué le badge Officiel.':'Le badge Officiel a été retiré.'}}); await log(value?'OFFICIAL_GRANTED':'OFFICIAL_REMOVED',b.id); return NextResponse.json(result); }
+    if (b.action === "official") { const value=Boolean(b.value); const current=b.kind==='user'?await prisma.user.findUnique({where:{id:b.id},select:{isOfficial:true}}):await prisma.app.findUnique({where:{id:b.id},select:{isOfficial:true}}); const result=b.kind==='user'?await prisma.user.update({where:{id:b.id},data:{isOfficial:value}}):await prisma.app.update({where:{id:b.id},data:{isOfficial:value}}); if(current?.isOfficial!==value) await prisma.announcement.create({data:{title:value?'Badge officiel attribué':'Badge officiel retiré',text:value?'BradSlayer vous a attribué le badge Officiel.':'Le badge Officiel a été retiré.'}}); if(current?.isOfficial!==value) await log(value?'OFFICIAL_GRANTED':'OFFICIAL_REMOVED',b.id); return NextResponse.json(result); }
     if (b.action === "profile") { const data={displayName:String(b.displayName||'').trim().slice(0,80),avatar:b.avatar?String(b.avatar).slice(0,300000):null,title:String(b.title||'Support').slice(0,80),active:b.active!==false,doNotDisturb:Boolean(b.doNotDisturb)}; const profile=b.id?await prisma.adminProfile.update({where:{id:b.id},data}):await prisma.adminProfile.create({data}); return NextResponse.json(profile); }
     if (b.action === "status") {
       const data: any = {
@@ -57,9 +57,9 @@ export async function POST(req: Request) {
     }
     if (b.action === "accountStatus") {
       const status = ["PENDING", "APPROVED", "REJECTED"].includes(b.status) ? b.status : "PENDING";
+      const before = await prisma.user.findUnique({ where: { id: b.id }, select: { accountStatus: true } });
       const user = await prisma.user.update({ where: { id: b.id }, data: { accountStatus: status, accountReason: status === "REJECTED" ? String(b.reason || "").slice(0, 500) || null : null } });
-      await prisma.announcement.create({ data: { title: status === "APPROVED" ? "Compte validé" : status === "REJECTED" ? "Compte refusé" : "Compte en attente", text: status === "APPROVED" ? "Votre compte développeur a été validé par l’équipe." : status === "REJECTED" ? `Votre compte développeur a été refusé${b.reason ? ` : ${String(b.reason).slice(0, 300)}` : "."}` : "Votre compte développeur est en cours de validation." } });
-      await log("ACCOUNT_" + status, b.id);
+      if (before?.accountStatus !== status) { await prisma.announcement.create({ data: { title: status === "APPROVED" ? "Compte validé" : status === "REJECTED" ? "Compte refusé" : "Compte en attente", text: status === "APPROVED" ? "Votre compte développeur a été validé par l’équipe." : status === "REJECTED" ? `Votre compte développeur a été refusé${b.reason ? ` : ${String(b.reason).slice(0, 300)}` : "."}` : "Votre compte développeur est en cours de validation." } }); await log("ACCOUNT_" + status, b.id); }
       return NextResponse.json(user);
     }
     if (b.action === "suspend") {
