@@ -48,3 +48,5 @@
 
 .admin-common-menu{display:none;margin:10px 16px}.admin-common-drawer{position:fixed;left:-260px;top:0;bottom:0;width:240px;z-index:30;background:#17131f;color:#e9e5f0;padding:22px 14px;display:flex;flex-direction:column;transition:left .2s;box-shadow:8px 0 30px #0004}.admin-common-drawer.open{left:0}.admin-common-drawer nav{display:grid;gap:4px;margin-top:20px}.admin-common-drawer nav a{color:#b8afc5;text-decoration:none;padding:11px 12px;border-radius:7px;font-size:12px}.admin-common-drawer nav a:hover{background:#362056;color:#fff}.admin-common-drawer .admin-logout{margin-top:auto}.admin-common-drawer .admin-close{display:block}
 @media(max-width:767px){.admin-common-menu{display:flex}.admin-common-drawer{left:-260px}.admin-common-drawer.open{left:0}}
+
+.developer-online-dot{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#24a148;box-shadow:0 0 0 2px #e5f6ea;vertical-align:middle}

@@ -96,3 +96,10 @@ Après validation admin, la fiche publique affiche **Installer l’application**
 Nouvelles colonnes facultatives sur `App` : `apkPath`, `apkSize`, `apkSha256`, `apkOriginalName`, `versionName`. Aucune table supplémentaire n’est utilisée pour les APK. Les variables serveur nécessaires sont `SUPABASE_URL` et `SUPABASE_SECRET_KEY`; cette dernière n’est jamais envoyée au navigateur.
 
 À vérifier dans l’environnement Vercel/Supabase : appliquer la migration Prisma avec la vraie `DATABASE_URL`, confirmer le bucket privé `apks` et tester les endpoints signés avec les variables `SUPABASE_URL` et `SUPABASE_SECRET_KEY`. Ces opérations réseau Supabase n’ont pas pu être testées avec un stockage de production depuis le sandbox.
+
+
+## Navigation développeur et support
+
+Le tiroir développeur suit l’ordre Statistiques, Mes applications, Mes applications en attente, Ajouter une app, Contact, Mon compte, puis déconnexion. Contact ouvre `/developer/support` et son point vert dépend de la présence réelle d’au moins un profil admin actif. Aucun changement de schéma ou de variable d’environnement n’a été ajouté.
+
+Les transitions d’authentification utilisent `router.replace`, et la flèche interne utilise `router.back()` seulement lorsque le précédent provient du même site ; sinon elle remplace vers l’accueil. Cela évite de repasser par la page connexion/inscription.
