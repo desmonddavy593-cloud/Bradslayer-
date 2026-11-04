@@ -50,3 +50,8 @@
 @media(max-width:767px){.admin-common-menu{display:flex}.admin-common-drawer{left:-260px}.admin-common-drawer.open{left:0}}
 
 .developer-online-dot{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#24a148;box-shadow:0 0 0 2px #e5f6ea;vertical-align:middle}
+
+/* Tiroirs persistants : le bouton Menu reste disponible sur chaque largeur. */
+.developer-sidebar{left:-270px;top:0;transition:left .2s;box-shadow:8px 0 24px #0005}.developer-sidebar.is-open{left:0}.developer-menu-button{display:flex;position:relative;z-index:51;margin:10px 13px;border:1px solid #ddd5e8;background:#fff;color:#4c3c62;border-radius:7px;padding:8px 11px;gap:7px;cursor:pointer}.developer-backdrop{display:block;position:fixed;z-index:50;inset:0;background:#100b1888}.developer-content,.developer-page{margin-left:0}
+.admin-sidebar{position:fixed;left:-250px;top:0;bottom:0;z-index:20;transition:left .2s;min-height:100vh}.admin-sidebar.open{left:0}.admin-main{width:100%;}.admin-backdrop{display:block;position:fixed;inset:0;background:#120d1a99;z-index:19}.admin-top .menu-toggle{display:flex;align-items:center;gap:6px;position:relative;z-index:21;cursor:pointer}.admin-common-menu{display:flex!important}.admin-common-drawer{left:-260px}.admin-common-drawer.open{left:0}
+.developer-close,.admin-sidebar .admin-close{display:block}
