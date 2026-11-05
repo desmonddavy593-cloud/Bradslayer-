@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "test:admin-menu": "node scripts/check-admin-menu.mjs"
   },
   "prisma": { "seed": "tsx prisma/seed.ts" },
   "dependencies": {

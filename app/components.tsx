@@ -1,5 +1,5 @@
 import Link from "next/link";
-import OfficialBadge from "./components/official-badge";
+import OfficialBadge from "../components/official-badge";
 export type StoreApp = {
   id: string;
   slug: string;

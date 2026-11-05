@@ -7,6 +7,7 @@ const log = async (action: string, target: string) => {
     await prisma.adminLog.create({ data: { action, target } });
   } catch {}
 };
+const personalAnnouncement = (recipientId:string,title:string,text:string) => prisma.announcement.create({data:{title,text,kind:"PERSONAL",recipientId}});
 export async function POST(req: Request) {
   const b = await req.json();
   if (b.action === "login") {
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
   if (b.action === "presence") { const id=readAdminProfile(); if(id) await prisma.adminProfile.updateMany({where:{id,active:true},data:{lastSeenAt:new Date()}}); return NextResponse.json({ok:true}); }
   if (b.action === "profileLogout") { const id=readAdminProfile(); if(id) await prisma.adminProfile.updateMany({where:{id},data:{lastSeenAt:null}}); const r=NextResponse.json({ok:true}); r.cookies.delete(ADMIN_PROFILE_COOKIE); return r; }
   try {
-    if (b.action === "official") { const value=Boolean(b.value); const current=b.kind==='user'?await prisma.user.findUnique({where:{id:b.id},select:{isOfficial:true}}):await prisma.app.findUnique({where:{id:b.id},select:{isOfficial:true}}); const result=b.kind==='user'?await prisma.user.update({where:{id:b.id},data:{isOfficial:value}}):await prisma.app.update({where:{id:b.id},data:{isOfficial:value}}); if(current?.isOfficial!==value) await prisma.announcement.create({data:{title:value?'Badge officiel attribué':'Badge officiel retiré',text:value?'BradSlayer vous a attribué le badge Officiel.':'Le badge Officiel a été retiré.'}}); if(current?.isOfficial!==value) await log(value?'OFFICIAL_GRANTED':'OFFICIAL_REMOVED',b.id); return NextResponse.json(result); }
+    if (b.action === "official") { const value=Boolean(b.value); const result=b.kind==='user'?await prisma.user.update({where:{id:b.id},data:{isOfficial:value}}):await prisma.app.update({where:{id:b.id},data:{isOfficial:value}}); const recipient=b.kind==='user'?b.id:(result as any).developerId; if(recipient) await personalAnnouncement(recipient,value?'Badge officiel attribué':'Badge officiel retiré',value?'BradSlayer vous a attribué le badge Officiel.':'Le badge Officiel a été retiré.'); await log(value?'OFFICIAL_GRANTED':'OFFICIAL_REMOVED',b.id); return NextResponse.json(result); }
     if (b.action === "profile") { const data={displayName:String(b.displayName||'').trim().slice(0,80),avatar:b.avatar?String(b.avatar).slice(0,300000):null,title:String(b.title||'Support').slice(0,80),active:b.active!==false,doNotDisturb:Boolean(b.doNotDisturb)}; const profile=b.id?await prisma.adminProfile.update({where:{id:b.id},data}):await prisma.adminProfile.create({data}); return NextResponse.json(profile); }
     if (b.action === "status") {
       const data: any = {
@@ -59,7 +60,8 @@ export async function POST(req: Request) {
       const status = ["PENDING", "APPROVED", "REJECTED"].includes(b.status) ? b.status : "PENDING";
       const before = await prisma.user.findUnique({ where: { id: b.id }, select: { accountStatus: true } });
       const user = await prisma.user.update({ where: { id: b.id }, data: { accountStatus: status, accountReason: status === "REJECTED" ? String(b.reason || "").slice(0, 500) || null : null } });
-      if (before?.accountStatus !== status) { await prisma.announcement.create({ data: { title: status === "APPROVED" ? "Compte validé" : status === "REJECTED" ? "Compte refusé" : "Compte en attente", text: status === "APPROVED" ? "Votre compte développeur a été validé par l’équipe." : status === "REJECTED" ? `Votre compte développeur a été refusé${b.reason ? ` : ${String(b.reason).slice(0, 300)}` : "."}` : "Votre compte développeur est en cours de validation." } }); await log("ACCOUNT_" + status, b.id); }
+      if (before?.accountStatus !== status) await personalAnnouncement(b.id,status === "APPROVED" ? "Compte validé" : status === "REJECTED" ? "Compte refusé" : "Compte en attente",status === "APPROVED" ? "Votre compte développeur a été validé par l’équipe." : status === "REJECTED" ? `Votre compte développeur a été refusé${b.reason ? ` : ${String(b.reason).slice(0, 300)}` : "."}` : "Votre compte développeur est en cours de validation.");
+      if (before?.accountStatus !== status) await log("ACCOUNT_" + status, b.id);
       return NextResponse.json(user);
     }
     if (b.action === "suspend") {
@@ -67,14 +69,14 @@ export async function POST(req: Request) {
         where: { id: b.id },
         data: { suspendedAt: b.value ? new Date() : null },
       });
-      await prisma.announcement.create({ data: { title: b.value ? "Compte suspendu" : "Compte réactivé", text: b.value ? "Votre compte développeur a été suspendu par l’administration." : "Votre compte développeur a été réactivé." } });
+      await personalAnnouncement(b.id,b.value ? "Compte suspendu" : "Compte réactivé",b.value ? "Votre compte développeur a été suspendu par l’administration." : "Votre compte développeur a été réactivé.");
       await log(b.value ? "USER_SUSPENDED" : "USER_REACTIVATED", b.id);
       return NextResponse.json(user);
     }
     if (b.action === "contact") {
       const status = ["NEW", "READ", "DONE"].includes(b.status) ? b.status : undefined;
       const message = await prisma.contactMessage.update({ where: { id: b.id }, data: { ...(status ? { status } : {}), ...(b.reply !== undefined ? { adminReply: String(b.reply).slice(0, 1000), status: "READ" } : {}) }, include: { user: { select: { id: true, username: true } } } });
-      if (b.reply !== undefined) await prisma.announcement.create({ data: { title: "Réponse de l’administration", text: `Une réponse est disponible pour votre message « ${message.subject} ».` } });
+      if (b.reply !== undefined) await personalAnnouncement(message.user.id,"Réponse de l’administration",`Une réponse est disponible pour votre message « ${message.subject} ».`);
       await log("CONTACT_" + (b.reply !== undefined ? "REPLIED" : status || "UPDATED"), b.id);
       return NextResponse.json(message);
     }
@@ -146,9 +148,11 @@ export async function GET() {
     likes,
     profiles,
     notifications,
+    unreadChat,
   ] = await Promise.all([
     prisma.app.findMany({
       orderBy: { createdAt: "desc" },
+      take: 20,
       include: {
         reviews: true,
         _count: { select: { likes: true, reports: true } },
@@ -156,20 +160,23 @@ export async function GET() {
     }),
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
+      take: 20,
       include: { _count: { select: { apps: true } } },
     }),
     prisma.report.findMany({
       orderBy: { createdAt: "desc" },
+      take: 20,
       include: { app: true },
     }),
-    prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" }, include: { user: { select: { username: true, email: true } } } }),
-    prisma.announcement.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.contactMessage.findMany({ take: 20, orderBy: { createdAt: "desc" }, include: { user: { select: { username: true, email: true } } } }),
+    prisma.announcement.findMany({ where: { kind: "PUBLIC", recipientId: null }, orderBy: { createdAt: "desc" }, take: 20 }),
     prisma.helpComment.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.guide.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.adminLog.findMany({ orderBy: { createdAt: "desc" }, take: 30 }),
     prisma.appLike.count(),
     prisma.adminProfile.findMany({ orderBy: { createdAt: "asc" } }),
-    prisma.adminNotification.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
+    prisma.adminNotification.findMany({ orderBy: { createdAt: "desc" }, take: 20 }),
+    prisma.chatMessage.count({ where: { sender: "USER", readAt: null } }),
   ]);
   const stats = await getStats(apps.map((a) => a.id));
   const summary = {
@@ -181,6 +188,7 @@ export async function GET() {
     pendingDevelopers: users.filter((u) => u.accountStatus === "PENDING").length,
     newMessages: contactMessages.filter((m) => m.status === "NEW").length,
     unreadNotifications: notifications.filter((n) => !n.readAt).length,
+    unreadChat,
     likes,
     totalViews: Object.values(stats).reduce(
       (n: any, s: any) => n + s.views.total,

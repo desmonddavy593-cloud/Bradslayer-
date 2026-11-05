@@ -29,6 +29,7 @@ model User {
   helpComments HelpComment[]
   contactMessages ContactMessage[]
   chatThreads ChatThread[]
+  personalAnnouncements Announcement[] @relation("AnnouncementRecipient")
 }
 
 model App {
@@ -105,10 +106,14 @@ model Announcement {
   id        String   @id @default(cuid())
   title     String
   text      String
+  kind      String   @default("PUBLIC")
+  recipientId String?
   createdAt DateTime @default(now())
   reads     AnnouncementRead[]
+  recipient User? @relation("AnnouncementRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
 
-  @@index([createdAt])
+  @@index([kind, recipientId, createdAt])
+  @@index([recipientId, createdAt])
 }
 
 model AnnouncementRead {

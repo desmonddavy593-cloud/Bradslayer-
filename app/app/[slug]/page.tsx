@@ -11,7 +11,7 @@ import {
 import ReviewForm from "./review-form";
 import { CommunityActions } from "./community-actions";
 import ApkDownload from "./apk-download";
-import OfficialBadge from "../../components/official-badge";
+import OfficialBadge from "../../../components/official-badge";
 export default async function AppDetail({
   params,
 }: {
