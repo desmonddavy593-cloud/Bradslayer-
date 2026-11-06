@@ -23,7 +23,7 @@ export type StoreApp = {
   versionName?: string | null;
   createdAt: Date;
   reviews?: any[];
-  _count?: { likes?: number; reports?: number };
+  _count?: { likes?: number; reports?: number; events?: number };
   isOfficial?: boolean;
 };
 export function AppIcon({

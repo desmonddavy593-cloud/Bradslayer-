@@ -1,102 +1,12 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getApp } from "@/lib/db";
-import { AppIcon, StoreApp } from "../../components";
-import {
-  FavoriteButton,
-  AddToHomeScreen,
-  TrackOpenButton,
-  TrackView,
-} from "../../store-client";
+import {notFound} from "next/navigation";
+import {getApp} from "@/lib/db";
+import {AppIcon,StoreApp} from "../../components";
+import {FavoriteButton,AddToHomeScreen,TrackOpenButton,TrackView} from "../../store-client";
 import ReviewForm from "./review-form";
-import { CommunityActions } from "./community-actions";
+import {CommunityActions} from "./community-actions";
 import ApkDownload from "./apk-download";
+import ScreenshotGallery from "./screenshot-gallery";
+import ReadMore from "./read-more";
 import OfficialBadge from "../../../components/official-badge";
-export default async function AppDetail({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const app = (await getApp(params.slug)) as
-    (StoreApp & { reviews?: any[] }) | null;
-  if (!app) notFound();
-  const reviews = app.reviews || [];
-  const average = reviews.length
-    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-    : app.rating;
-  return (
-    <div className="page-shell detail-page">
-      <TrackView appId={app.id} />
-      <Link href="/" className="detail-back">
-        ← Retour au store
-      </Link>
-      <section className="detail-hero">
-        <div className="detail-icon-wrap">
-          <AppIcon app={app} large />
-          <FavoriteButton appId={app.id} />
-        </div>
-        <div className="detail-copy">
-          <span className="eyebrow gold">{app.category}</span>
-          <h1>{app.name}</h1>
-          <p className="developer">
-            par <strong>{app.developer}</strong> {app.isOfficial&&<OfficialBadge size={16}/>} 
-          </p>
-          <div className="detail-stats">
-            <div>
-              <strong>★ {average.toFixed(1)}</strong>
-              <small>Note moyenne</small>
-            </div>
-            <div>
-              <strong>{reviews.length}</strong>
-              <small>Avis</small>
-            </div>
-            <div>
-              <strong>{app._count?.likes || 0}</strong>
-              <small>J’aime</small>
-            </div>
-          </div>
-          <div className="detail-actions">
-            {app.apkPath ? <ApkDownload appId={app.id} name={app.name} /> : <><TrackOpenButton appId={app.id} url={app.url} /><AddToHomeScreen url={app.url} /></>}
-          </div>
-          <CommunityActions
-            appId={app.id}
-            initialLikes={app._count?.likes || 0}
-          />
-        </div>
-      </section>
-      <p className="detail-description">
-        {app.longDescription || app.description}
-      </p>
-      {app.screenshots?.length > 0 && (
-        <section>
-          <h2>Captures d’écran</h2>
-          <div className="screenshots">
-            {app.screenshots.map((src, i) => (
-              <img
-                key={src}
-                src={src}
-                alt={`Capture ${i + 1} de ${app.name}`}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-      <section className="reviews">
-        <div className="section-heading">
-          <h2>Avis de la communauté</h2>
-          <span className="stars">★★★★★</span>
-        </div>
-        {reviews.map((r) => (
-          <article className="review" key={r.id}>
-            <strong>
-              {r.nickname} <span className="stars">{"★".repeat(r.rating)}</span>
-            </strong>
-            <p>{r.comment}</p>
-            <small>{new Date(r.createdAt).toLocaleDateString("fr-FR")}</small>
-          </article>
-        ))}
-        <ReviewForm slug={app.slug} />
-      </section>
-    </div>
-  );
-}
+export default async function AppDetail({params}:{params:{slug:string}}){const app=(await getApp(params.slug)) as (StoreApp & {reviews?:any[]})|null;if(!app)notFound();const reviews=app.reviews||[];const average=reviews.length?reviews.reduce((s,r)=>s+r.rating,0)/reviews.length:app.rating;const description=app.longDescription||app.description;return <div className="page-shell detail-page"><TrackView appId={app.id}/><section className="play-detail-head"><div className="detail-icon-wrap"><AppIcon app={app} large/><FavoriteButton appId={app.id}/></div><div className="detail-copy"><h1>{app.name}</h1><Link className="developer-link" href={`/developers?developer=${encodeURIComponent(app.developer)}`}>par {app.developer} {app.isOfficial&&<OfficialBadge size={16}/>}</Link><span className="detail-category">{app.category}</span></div></section><div className="detail-stats play-stats"><div><strong>★ {average.toFixed(1)}</strong><small>{reviews.length} avis</small></div><div><strong>{app.apkSize?`${(app.apkSize/1048576).toFixed(1)} Mo`:'PWA'}</strong><small>Taille</small></div><div><strong>{app._count?.events||0}</strong><small>Téléchargements</small></div><div><strong>{app.versionName||'—'}</strong><small>Version</small></div></div><div className="detail-actions play-install">{app.apkPath?<ApkDownload appId={app.id} name={app.name}/>:<><TrackOpenButton appId={app.id} url={app.url}/><AddToHomeScreen url={app.url}/></>}</div><CommunityActions appId={app.id} initialLikes={app._count?.likes||0}/><ScreenshotGallery screenshots={app.screenshots||[]} name={app.name}/><section className="about-app"><h2>À propos de cette application</h2><ReadMore text={description}/></section><section className="reviews"><div className="section-heading"><h2>Évaluations et avis</h2><span className="stars">★★★★★</span></div>{reviews.map(r=><article className="review" key={r.id}><strong>{r.nickname} <span className="stars">{"★".repeat(r.rating)}</span></strong><p>{r.comment}</p><small>{new Date(r.createdAt).toLocaleDateString("fr-FR")}</small></article>)}<ReviewForm slug={app.slug}/></section></div>}

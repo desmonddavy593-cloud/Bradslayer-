@@ -181,7 +181,7 @@ export async function getApp(slug: string) {
       where: { slug, status: "APPROVED" },
       include: {
         reviews: { orderBy: { createdAt: "desc" } },
-        _count: { select: { likes: true } },
+        _count: { select: { likes: true, events: { where: { type: "DOWNLOAD" } } } },
       },
     });
   } catch {

@@ -29,6 +29,7 @@ export default function NavigationControls(){
 
   function goBack(){
     if(navigating.current)return;
+    if(window.history.state?.gallery){window.history.back();return}
     navigating.current=true;
     let previous='/';
     try{
